@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Rocket Avia</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>ё
+    <string name="facebook_app_id">922093135662773</string>
+    <string name="fb_login_protocol_scheme">fb922093135662773</string>
+    <string name="facebook_client_token">19b5919b725fa2324c3488227eb5c377</string>
+</resources>
