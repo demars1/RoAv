@@ -35,7 +35,7 @@ val appModule = module {
         single (named("GetNet")){
 
             Retrofit.Builder()
-                .baseUrl("http://185.46.9.229:4002/v1/")
+                .baseUrl("https://appgp.alopadsa.ru/v1/")
                 .client(get(named("OkHttpGet")))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()

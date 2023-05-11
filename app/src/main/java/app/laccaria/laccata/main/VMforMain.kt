@@ -2,6 +2,7 @@ package app.laccaria.laccata.main
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -42,6 +43,7 @@ class VMforMain(private val application: Application): ViewModel() {
     private var conversionDataListener: AppsFlyerConversionListener = object :
         AppsFlyerConversionListener {
         override fun onConversionDataSuccess(conversionDataMap: Map<String, Any>) {
+            Log.d("AppsDataGotten", conversionDataMap.toString())
             _appsData.postValue(conversionDataMap)
         }
         override fun onConversionDataFail(errorMessage: String) {

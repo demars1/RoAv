@@ -29,6 +29,8 @@ class AppLicClass: Application() {
         var offer = "null"
         var geotaaaag = "null"
         var utcTime: String = "null"
+        var tail: String = ""
+        var trackId: String = ""
     }
 
     override fun onCreate() {
@@ -37,7 +39,7 @@ class AppLicClass: Application() {
 
         // OneSignal Initialization
         OneSignal.initWithContext(this);
-        OneSignal.setAppId(os_key);
+        OneSignal.setAppId(os_key)
 
         startKoin{
             androidLogger()

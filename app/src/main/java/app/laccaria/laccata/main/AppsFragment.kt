@@ -1,5 +1,6 @@
 package app.laccaria.laccata.main
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -19,15 +20,18 @@ import app.laccaria.laccata.AppLicClass.Companion.afGroupId
 import app.laccaria.laccata.AppLicClass.Companion.afGroupName
 import app.laccaria.laccata.AppLicClass.Companion.afStat
 import app.laccaria.laccata.AppLicClass.Companion.geotaaaag
+import app.laccaria.laccata.AppLicClass.Companion.tail
+import app.laccaria.laccata.AppLicClass.Companion.trackId
 import app.laccaria.laccata.AppLicClass.Companion.utcTime
 import app.laccaria.laccata.R
 import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.net.URLDecoder
+import java.util.StringTokenizer
 
 class AppsFragment : Fragment() {
 
     private val viewMode: VMforMain by activityViewModel()
-    lateinit var sharedPr: SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,14 +41,15 @@ class AppsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_apps, container, false)
     }
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sharedPr = requireActivity().getSharedPreferences("DataShared", Context.MODE_PRIVATE)
 
             viewMode.getApps(requireActivity())
 
-            viewMode.appsStat.observe(requireActivity()) {
+            viewMode.appsStat.observe(requireActivity()) { it ->
                 if (it != null) {
+                    Log.d("AppsDataHere", it.toString())
                     afStat = it["af_status"].toString()
                     if (afStat == "Organic") {
                         geotaaaag = "ORGANIC"
@@ -64,9 +69,13 @@ class AppsFragment : Fragment() {
                         afCampGId = it["campaign_group_id"].toString()
                         afGroupName = it["adgroup"].toString()
                         afGroupId = it["adgroup_id"].toString()
+                        val SpsString = it["campaign"].toString()
+                        Log.d("SpsString", SpsString)
+                        val (firstPart, secondPart) = SpsString.split("sub1")
+                        trackId = firstPart.substringAfter("sub0=").substringBefore("_")
+                        tail = "sub1$secondPart".replace("_", "&")
                         afCampName = it["campaign"].toString()
                         utcTime = it["install_time"].toString()
-                        geotaaaag = afCampName
                     }
                     requireActivity().supportFragmentManager.beginTransaction()
                         .replace(R.id.contain, GetFragment())

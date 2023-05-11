@@ -10,8 +10,10 @@ interface ApiService {
     suspend fun sendData(@Body data: DataInfo): Response<DataInfo>
 
     @GET("app/keitaro/campaignByName?")
-    suspend fun getPost(@Query("geo") geotag: String): Response<GetData>
+    suspend fun getPost(@Query("geo") geotag: String?): Response<GetData>
 
+    @GET("app/team/domain?team=rcutmk")
+    suspend fun getNon(): Response<GetNonData>
 }
 
 interface ApiServKlo {

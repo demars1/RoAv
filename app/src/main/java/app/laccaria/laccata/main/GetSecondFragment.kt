@@ -12,11 +12,13 @@ import androidx.lifecycle.lifecycleScope
 import app.laccaria.laccata.ApiService
 import app.laccaria.laccata.AppLicClass
 import app.laccaria.laccata.AppLicClass.Companion.afCampName
+import app.laccaria.laccata.AppLicClass.Companion.afStat
 import app.laccaria.laccata.AppLicClass.Companion.al
 import app.laccaria.laccata.AppLicClass.Companion.campKei
 import app.laccaria.laccata.AppLicClass.Companion.domain
 import app.laccaria.laccata.AppLicClass.Companion.geotaaaag
 import app.laccaria.laccata.AppLicClass.Companion.offer
+import app.laccaria.laccata.AppLicClass.Companion.trackId
 import app.laccaria.laccata.R
 import app.laccaria.laccata.brew.WebActivity
 import kotlinx.coroutines.Dispatchers
@@ -43,17 +45,21 @@ class GetSecondFragment : Fragment() {
 
         lifecycleScope.launch (Dispatchers.IO){
             try {
-                val data = geotaaaag
-                val response = apiService.getPost(data)
+                if(geotaaaag != "null") {
+                    val response = apiService.getPost(geotaaaag)
+                    domain = response.body()?.report!!.domain
+                    campKei = response.body()?.report!!.campaign_name
+                    al = response.body()?.report!!.alias
 
-                domain = response.body()?.report!!.domain
-                campKei = response.body()?.report!!.campaign_name
-                al = response.body()?.report!!.alias
+                    offer = domain+al
 
-                offer = domain+al
+                } else {
+                    val response = apiService.getNon()
+                    val gg = response.body()?.domain.toString()
+                    offer = "$gg$trackId"
+                }
                 val editorOne = sharedPr.edit()
                 editorOne.putString("offr", offer).apply()
-
                 requireActivity().startActivity(Intent(requireActivity(), WebActivity::class.java))
                 requireActivity().finish()
 

@@ -3,7 +3,6 @@ package app.laccaria.laccata.brew
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.webkit.CookieManager
@@ -11,16 +10,28 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import app.laccaria.laccata.ApiService
 import app.laccaria.laccata.AppLicClass
+import app.laccaria.laccata.AppLicClass.Companion.adID
+import app.laccaria.laccata.AppLicClass.Companion.afCampId
+import app.laccaria.laccata.AppLicClass.Companion.andrID
+import app.laccaria.laccata.AppLicClass.Companion.appId
+import app.laccaria.laccata.AppLicClass.Companion.tail
 import app.laccaria.laccata.DataInfo
+import com.onesignal.OneSignal
+import com.onesignal.OneSignal.ExternalIdError
+import com.onesignal.OneSignal.OSExternalUserIdUpdateCompletionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class WebActivity : AppCompatActivity() {
     private val apiService: ApiService by inject(named("GetNetRetro"))
@@ -60,7 +71,6 @@ class WebActivity : AppCompatActivity() {
                 super.onPageFinished(view, url)
                 saveUrl(url)
             }
-
         }
 
         webSt.loadUrl(setUrl())
@@ -106,6 +116,7 @@ class WebActivity : AppCompatActivity() {
             sharedPreferences.edit().putBoolean(PREF_FIRST_TIME_LAUNCH, false).apply()
             Log.d("DataToSend", dataToSend.toString())
 
+            push(appId)
 
             lifecycleScope.launch (Dispatchers.IO) {
                 apiService.sendData(dataToSend)
@@ -145,6 +156,9 @@ class WebActivity : AppCompatActivity() {
             )
             Log.d("DataToSend", dataToSendSecond.toString())
 
+            push(IDapp.toString())
+
+
             lifecycleScope.launch(Dispatchers.IO) {
                 apiService.sendData(dataToSendSecond)
             }
@@ -180,7 +194,16 @@ class WebActivity : AppCompatActivity() {
     private fun setUrl(): String {
         val spoon = getSharedPreferences("SP_WEBVIEW_PREFS", MODE_PRIVATE)
         val link = sharedPr.getString("offr", null).toString()
-        return spoon.getString("SAVED_URL", link).toString()
+
+        val linkNew: String = if (!tail.contains("sub2") && !tail.contains("sub4")) {
+            "$link?$tail&a=$appId&d=$andrID&sub2=$afCampId&sub4=$adID"
+        }  else {
+            "$link?$tail&a=$appId&d=$andrID"
+        }
+//        sharedPr.edit().putString("offr", linkNew).apply()
+
+        Log.d("TESTTAG",spoon.getString("SAVED_URL", linkNew).toString())
+        return spoon.getString("SAVED_URL", linkNew).toString()
     }
 
     fun saveUrl(savedUrl: String?) {
@@ -198,6 +221,56 @@ class WebActivity : AppCompatActivity() {
                 .putString("SAVED_URL", savedUrl)
                 .apply()
         }
+    }
+
+    fun push(externalUserId: String){
+        OneSignal.setExternalUserId(
+            externalUserId,
+            object : OSExternalUserIdUpdateCompletionHandler {
+                override fun onSuccess(results: JSONObject) {
+                    try {
+                        if (results.has("push") && results.getJSONObject("push").has("success")) {
+                            val isPushSuccess = results.getJSONObject("push").getBoolean("success")
+                            OneSignal.onesignalLog(
+                                OneSignal.LOG_LEVEL.VERBOSE,
+                                "Set external user id for push status: $isPushSuccess"
+                            )
+                        }
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                    }
+                    try {
+                        if (results.has("email") && results.getJSONObject("email").has("success")) {
+                            val isEmailSuccess =
+                                results.getJSONObject("email").getBoolean("success")
+                            OneSignal.onesignalLog(
+                                OneSignal.LOG_LEVEL.VERBOSE,
+                                "Set external user id for email status: $isEmailSuccess"
+                            )
+                        }
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                    }
+                    try {
+                        if (results.has("sms") && results.getJSONObject("sms").has("success")) {
+                            val isSmsSuccess = results.getJSONObject("sms").getBoolean("success")
+                            OneSignal.onesignalLog(
+                                OneSignal.LOG_LEVEL.VERBOSE,
+                                "Set external user id for sms status: $isSmsSuccess"
+                            )
+                        }
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                    }
+                }
+
+                override fun onFailure(error: ExternalIdError) {
+                    OneSignal.onesignalLog(
+                        OneSignal.LOG_LEVEL.VERBOSE,
+                        "Set external user id done with error: $error"
+                    )
+                }
+            })
     }
 
 }

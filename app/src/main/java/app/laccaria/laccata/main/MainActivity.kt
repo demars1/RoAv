@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val sharedPr = getSharedPreferences("DataShared", Context.MODE_PRIVATE)
                 val check = sharedPr.getString("WhereTo", null)
-                Log.d("WhereTo", check.toString())
 
                 if (check == "Webs") {
                     startActivity(Intent(this, WebActivity::class.java))
